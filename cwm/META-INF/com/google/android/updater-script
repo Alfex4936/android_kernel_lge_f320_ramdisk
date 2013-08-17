@@ -1,0 +1,10 @@
+ui_print("");
+ui_print(" LG G2// FRANCO-C Install Script:               ");
+ui_print("");
+set_progress(1.000000);
+mount("ext4", "EMMC", "/dev/block/platform/msm_sdcc.1/by-name/system", "/system");
+ui_print(" > Installing G2 Kernel ...");
+package_extract_file("boot.img", "/dev/block/platform/msm_sdcc.1/by-name/boot");
+ui_print(" > Installation is finished ...");
+ui_print(" > Please Reboot ...");
+ui_print("");

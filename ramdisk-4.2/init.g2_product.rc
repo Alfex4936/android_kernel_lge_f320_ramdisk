@@ -1,0 +1,89 @@
+## Be careful to use "exec" command.
+## If you execute a non-existing file, an additional init process can be created!
+
+on boot
+# LGE_CHANGE_S, [LGE_DATA][WCDMA_Window_Size], hyoseab.song@lge.com, 2013-02-25
+# Re-define TCP buffer size for SKT WCDMA network. Overwrite init.rc property
+# ReadMin, ReadInitial, ReadMax, WriteMin, WriteInitial, WriteMax,
+	setprop net.tcp.buffersize.umts		4094,87380,1220608,4096,16384,1220608
+    setprop net.tcp.buffersize.hspa		4094,87380,1220608,4096,16384,1220608
+    setprop net.tcp.buffersize.hsupa	4094,87380,1220608,4096,16384,1220608
+    setprop net.tcp.buffersize.hsdpa	4094,87380,1220608,4096,16384,1220608
+    setprop net.tcp.buffersize.lte     524288,1048576,2560000,524288,1048576,2560000
+# LGE_CHANGE_E, [LGE_DATA][WCDMA_Window_Size], hyoseab.song@lge.com, 2013-02-25
+
+# 2012-10-10 kenneth.ryu@lge.com LGP_DATA_RIL_DISABLE_PATIALRETRY [START]
+	setprop persist.qcril.disable_retry	true
+# 2012-10-10 kenneth.ryu@lge.com LGP_DATA_RIL_DISABLE_PATIALRETRY [END]
+
+# LGE_CHANGE_S, [LGE_DATA][LPP_UPLUS_DATA_TCPIP_NSRM], ct-radio@lge.com, 2012-04-05
+          setprop lg.data.nsrm.policypath         /data/connectivity/nsrm/NsrmConfiguration.xml
+          setprop persist.cne.nsrm.bkg.evt        3955
+          chmod 0644 /persist/init.cne.rc
+# LGE_CHANGE_E, [LGE_DATA][LPP_UPLUS_DATA_TCPIP_NSRM], ct-radio@lge.com, 2012-04-05
+
+# LGE_CHANGE_S LGT_REQ  [smile.kim@lge.com][2012-02-15][BEGIN]
+    mkdir /data/data/com.ubivelox.wipiplayer/W 0777 system system
+    mkdir /data/LGTContents 0771 system lgt_gid
+    mkdir /data/LGTContents/app 0771 system lgt_gid
+    mkdir /data/LGTContents/video 0771 system lgt_gid
+    mkdir /data/LGTContents/music 0771 system lgt_gid
+    mkdir /data/LGTContents/bell 0771 system lgt_gid
+    mkdir /data/LGTContents/DLtmp 0771 system lgt_gid
+    chmod 771 /system/persist
+    chmod 665 /system/persist/LGUPlus_Api.xml
+    chmod 775 /system/lib/modules/mwlan_aarp.ko
+
+# [smile.kim@lge.com][2012-02-15] add LGTConents
+    chown system lgt_gid /data/data/com.ubivelox.wipiplayer/W
+    chown system lgt_gid /data/LGTContents
+    chown system lgt_gid /data/LGTContents/video
+    chown system lgt_gid /data/LGTContents/music
+    chown system lgt_gid /data/LGTContents/bell
+    chown system lgt_gid /data/LGTContents/app
+    chown system lgt_gid /data/LGTContents/DLtmp
+# LGE_CHANGE_E LGT_REQ  [smile.kim@lge.com][2012-02-15][END]
+
+# LGE_CHANGE_S, [yeonjun.kim@lge.com][2013-06-14] set default brightness
+    write /sys/class/leds/lcd-backlight/brightness 173
+
+# Bluetooth tethering
+    setprop bluetooth.pan true
+
+on init
+    # LGE_CHANGE_S, G2-FS@lge.com, 2013-03-23, export external sdcard
+    mkdir /storage/external_SD 0000 system system
+    export EXTERNAL_ADD_STORAGE /storage/external_SD
+    # LGE_CHANGE_E, G2-FS@lge.com, 2013-03-23, export external sdcard
+
+#2013.04.01 LGE_CHANGE_S hyeongjin.kim@lge.com, SMPL count
+service smpl_count /system/bin/smpl_count
+    class main
+	user root
+	oneshot
+#2013.04.01 LGE_CHANGE_E hyeongjin.kim@lge.com, SMPL count
+
+on post-fs
+    chmod 0644 /system/lib/modules/mwlan_aarp.ko
+    insmod /system/lib/modules/mwlan_aarp.ko
+    chmod 0644 /system/lib/modules/ipsecdrvtl.ko
+
+# LGE_CHANGE_S, [LGE_DATA][LPP_UPLUS_DATA_TCPIP_NSRM], ct-radio@lge.com, 2012-04-05    
+#on post-fs-data
+		#exec /system/bin/sh /system/etc/lg.nsrm.sh
+		
+		#mkdir /data/connectivity 0775 system system
+		#mkdir /data/connectivity/nsrm 0775 system system
+		#copy /system/etc/cne/NsrmConfiguration.xml /data/connectivity/nsrm/NsrmConfiguration.xml
+		#chown system system /data/connectivity/nsrm/NsrmConfiguration.xml
+		#chmod 775 /data/connectivity/nsrm/NsrmConfiguration.xml
+# LGE_CHANGE_E, [LGE_DATA][LPP_UPLUS_DATA_TCPIP_NSRM], ct-radio@lge.com, 2012-04-05
+
+# LGE_CHANGE_S, 20130507 G2-FS@lge.com, factory reset magic code
+on property:sys.factory=1
+    exec /system/bin/dd if=/system/etc/factory_reset_magic of=/dev/block/platform/msm_sdcc.1/by-name/pad1 bs=512 count=1
+# LGE_CHANGE_S, 20130507 G2-FS@lge.com, factory reset magic code
+
+# LGE_CHANGE_S, 20130604 bill.jung@lge.com, Enable WiFi Direct 5GHz GO/GC
+    setprop wifi.lge.supportp2p5g full
+# LGE_CHANGE_E, 20130604 bill.jung@lge.com, Enable WiFi Direct 5GHz GO/GC
